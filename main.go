@@ -36,6 +36,7 @@ func main() {
 		// input.Close()
 		if err != nil {
 			fmt.Println(err.Error())
+			return
 		}
 	} else {
 		// if no input file, alternatively using the stdin
