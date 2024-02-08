@@ -6,6 +6,13 @@ import (
 	"os"
 )
 
+var (
+	err   error
+	input *os.File
+	res   map[string]interface{}
+	dec   *json.Decoder
+)
+
 func openFile(filepath string) (*os.File, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -14,13 +21,14 @@ func openFile(filepath string) (*os.File, error) {
 	return file, nil
 }
 
+func decodeJson(*os.File) error {
+	// create decoder based on input and decode it
+	dec = json.NewDecoder(input)
+	err = dec.Decode(&res)
+	return err
+}
+
 func main() {
-	var (
-		err   error
-		input *os.File
-		res   map[string]interface{}
-		dec   *json.Decoder
-	)
 
 	if len(os.Args) > 1 {
 		// if input file exist
@@ -34,9 +42,9 @@ func main() {
 		input = os.Stdin
 	}
 
-	// create decoder based on input and decode it
-	dec = json.NewDecoder(input)
-	err = dec.Decode(&res)
+	// decode JSON
+
+	err = decodeJson(input)
 
 	if err != nil {
 		fmt.Printf("invalid json => %s\n", err.Error())
