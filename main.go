@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -15,6 +16,8 @@ var (
 )
 
 var ErrFileNotFound = errors.New("file not found")
+var ErrInvalidSyntax = errors.New("invalid syntax")
+var syntaxErr *json.SyntaxError
 
 func openFile(filepath string) (*os.File, error) {
 	file, err := os.Open(filepath)
@@ -27,10 +30,13 @@ func openFile(filepath string) (*os.File, error) {
 	return file, nil
 }
 
-func decodeJson(*os.File) error {
+func decodeJson(input io.Reader, output *map[string]interface{}) error {
 	// create decoder based on input and decode it
 	dec = json.NewDecoder(input)
-	err = dec.Decode(&res)
+	err = dec.Decode(&output)
+	if errors.As(err, &syntaxErr) {
+		err = ErrInvalidSyntax
+	}
 	return err
 }
 
@@ -51,7 +57,7 @@ func main() {
 
 	// decode JSON
 
-	err = decodeJson(input)
+	err = decodeJson(input, &res)
 
 	if err != nil {
 		fmt.Printf("invalid json => %s\n", err.Error())
