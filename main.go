@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 )
@@ -13,9 +14,14 @@ var (
 	dec   *json.Decoder
 )
 
+var ErrFileNotFound = errors.New("file not found")
+
 func openFile(filepath string) (*os.File, error) {
 	file, err := os.Open(filepath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, ErrFileNotFound
+		}
 		return nil, err
 	}
 	return file, nil
